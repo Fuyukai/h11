@@ -1,3 +1,55 @@
+[build-system]
+requires = [
+    "setuptools >= 77",
+    "setuptools_scm >= 6.4"
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "h11"
+authors = [
+    { name = "Nathaniel J. Smith", email = "njs@pobox.com" }
+]
+license = { file = "MIT" }
+requires-python = ">=3.10"
+dynamic = ["version"]
+
+[project.urls]
+source = "https://github.com/python-hyper/h11"
+
+[tool.setuptools]
+packages = ["h11"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.14.2",
+    "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",
+]
+
+[tool.ruff]
+target-version = "py310"
+line-length = 88
+respect-gitignore = true
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "TID252",
+    "ERA001",
+    "PLR2004", # HTTP library has magic numbers, shocking!
+
+    # Existing project code style
+    "D",
+    "SLF001",
+    
+    # Bad lints
+    "TRY",
+    "EM",
+    "S101",    # Allow asserts
+    "TC006",
+]
+
 [tool.towncrier]
 # Usage:
 # - PRs should drop a file like "issuenumber.feature" in newsfragments
