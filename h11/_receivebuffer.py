@@ -1,5 +1,9 @@
 import re
-from typing import Self
+
+try:
+    from typing import Self  # pyrefly: ignore
+except ImportError:
+    from typing_extensions import Self
 
 __all__ = ["ReceiveBuffer"]
 

@@ -23,12 +23,16 @@ source = "https://github.com/python-hyper/h11"
 [tool.setuptools]
 packages = ["h11"]
 
+[tool.setuptools.dynamic]
+version = { attr = "h11._version.__version__" }
+
 [dependency-groups]
 dev = [
     "ruff>=0.14.2",
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
     "tox>=4.32.0",
+    "pyrefly>=0.39.2",
 ]
 
 [tool.ruff]
@@ -118,3 +122,7 @@ strict = true
 warn_unused_configs = true
 warn_unused_ignores = true
 show_error_codes = true
+
+[tool.tox]
+requires = ["tox>=4.32"]
+envlist = ["format", "py310", "py311", "py312", "py313", "py314", "pypy3"]

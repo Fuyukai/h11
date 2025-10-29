@@ -8,12 +8,6 @@ import threading
 from collections.abc import Callable, Generator
 from contextlib import closing, contextmanager
 from http.server import SimpleHTTPRequestHandler
-
-try:
-    from typing import override
-except ImportError:
-    from typing_extensions import override
-
 from urllib.request import urlopen
 
 import h11
@@ -41,8 +35,7 @@ with open(test_file_path, "rb") as f:
 
 
 class SingleMindedRequestHandler(SimpleHTTPRequestHandler):
-    @override
-    def translate_path(self, path: str) -> str:
+    def translate_path(self, path: str) -> str:  # noqa: ARG002
         return test_file_path
 
 

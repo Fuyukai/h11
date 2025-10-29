@@ -117,6 +117,26 @@ marker = "\"default\" in dependency_groups and python_version < \"3.12\" or \"de
 dependencies = []
 
 [[packages]]
+name = "pyrefly"
+version = "0.39.2"
+requires-python = ">=3.8"
+sdist = {name = "pyrefly-0.39.2.tar.gz", url = "https://files.pythonhosted.org/packages/d2/a0/2edbf98dd17a2f1209d7ee5424599222bc9438105f0398a37e9adf7e333e/pyrefly-0.39.2.tar.gz", hashes = {sha256 = "21669b53bcd831eea8f6b38ebb7da062e3060b416eb8ffccbebf4ae35be75fac"}}
+wheels = [
+    {name = "pyrefly-0.39.2-py3-none-macosx_10_12_x86_64.whl",url = "https://files.pythonhosted.org/packages/ba/66/cb9937d4cb828c78ecba35b074510fb149405b4fafd641a5128109934242/pyrefly-0.39.2-py3-none-macosx_10_12_x86_64.whl",hashes = {sha256 = "a82bcc2d4b677e54110f9b7242db10791a5e8ada510a56352daeecdfeaaf5ba8"}},
+    {name = "pyrefly-0.39.2-py3-none-macosx_11_0_arm64.whl",url = "https://files.pythonhosted.org/packages/d3/74/c32977401fd37e862ed02559d7da1f68e1f2ae4d50e8820c826104837a26/pyrefly-0.39.2-py3-none-macosx_11_0_arm64.whl",hashes = {sha256 = "f56265fea205d6c9f06d3ed8df194e6310940b4e2fa72ac78bcf3e7509f07f59"}},
+    {name = "pyrefly-0.39.2-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",url = "https://files.pythonhosted.org/packages/14/a8/c68a4ea5a8ab43a7d762cde89691d13eb75811ddbd81be70771010198d6d/pyrefly-0.39.2-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.whl",hashes = {sha256 = "c06e048153d84cc7f6eb3e731601e3d4834295478239a3016bcb973f01ea5505"}},
+    {name = "pyrefly-0.39.2-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl",url = "https://files.pythonhosted.org/packages/d6/44/75f696bc9a6059142ab407e4ce5539ef27db3299b3a9f451753c67c2f95e/pyrefly-0.39.2-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl",hashes = {sha256 = "99af4063dbdce75a336cc5c72fea8ba411fce805eb94e3e1ec77ce3d202eb43c"}},
+    {name = "pyrefly-0.39.2-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",url = "https://files.pythonhosted.org/packages/41/a5/c2b72c3b1f0fc98215f7716ebf127fca2e714a21211cd6f4b9f47a3aae9f/pyrefly-0.39.2-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",hashes = {sha256 = "19785bccc541872173ac41c7abf66236489490689df7be9c9daa56bdc6c206d6"}},
+    {name = "pyrefly-0.39.2-py3-none-win32.whl",url = "https://files.pythonhosted.org/packages/a7/35/f429a501c54f108cbcbedc37d05a9cd29179b6f577208ff145abf0dd2b9d/pyrefly-0.39.2-py3-none-win32.whl",hashes = {sha256 = "4c247e615d1f846d9f0959831b2890db7615c6d9ff309014f8e2ecdc06f12de1"}},
+    {name = "pyrefly-0.39.2-py3-none-win_amd64.whl",url = "https://files.pythonhosted.org/packages/b4/cb/b5457410ea6745c35c4e7a254149c1cdce8aa03098052fbc438d1a538d6c/pyrefly-0.39.2-py3-none-win_amd64.whl",hashes = {sha256 = "54b15dbb6a9bb1c6fe63322eafa305e56242846467d07f86bdfb73403a1e6c72"}},
+    {name = "pyrefly-0.39.2-py3-none-win_arm64.whl",url = "https://files.pythonhosted.org/packages/8d/a4/acbc52be49039f1d0a27473ec2b951a8ead1bd476c6fe6d1497ddbe2c948/pyrefly-0.39.2-py3-none-win_arm64.whl",hashes = {sha256 = "50226586994df6a1ac8d9cb653d2c0e506f6b3efd6b2719cffcb4d246b758363"}},
+]
+marker = "\"dev\" in dependency_groups"
+
+[packages.tool.pdm]
+dependencies = []
+
+[[packages]]
 name = "pluggy"
 version = "1.6.0"
 requires-python = ">=3.9"
@@ -452,7 +472,7 @@ marker = "\"dev\" in dependency_groups"
 dependencies = []
 
 [tool.pdm]
-hashes = {sha256 = "d7698b23fd46677cb38e8fdcbdc077099e19fdb55ab560ac6fff1b4b55ed6c5b"}
+hashes = {sha256 = "42afc75737c8509c983671b1f9bbe58ff57676dc73f453b3f9453563b4d55665"}
 strategy = ["inherit_metadata", "static_urls"]
 
 [[tool.pdm.targets]]

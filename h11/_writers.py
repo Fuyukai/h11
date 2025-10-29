@@ -15,11 +15,6 @@ from ._headers import Headers
 from ._state import CLIENT, IDLE, SEND_BODY, SEND_RESPONSE, SERVER
 from ._util import LocalProtocolError, Sentinel
 
-try:
-    from typing import override
-except ImportError:
-    from typing_extensions import override
-
 __all__ = ["WRITERS"]
 
 Writer = Callable[[bytes], Any]
@@ -97,8 +92,7 @@ class ContentLengthWriter(BodyWriter):
             raise LocalProtocolError("Too much data for declared Content-Length")
         write(data)
 
-    @override
-    def send_eom(self, headers: Headers, write: Writer) -> None:
+    def send_eom(self, headers: Headers, write: Writer) -> None:  # noqa: ARG002
         if self._length != 0:
             raise LocalProtocolError("Too little data for declared Content-Length")
         if headers:
@@ -124,8 +118,7 @@ class Http10Writer(BodyWriter):
     def send_data(self, data: bytes, write: Writer) -> None:
         write(data)
 
-    @override
-    def send_eom(self, headers: Headers, write: Writer) -> None:
+    def send_eom(self, headers: Headers, write: Writer) -> None:  # noqa: ARG002
         if headers:
             raise LocalProtocolError("can't send trailers to HTTP/1.0 client")
         # no need to close the socket ourselves, that will be taken care of by
