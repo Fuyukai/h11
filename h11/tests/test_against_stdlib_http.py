@@ -3,9 +3,9 @@ import os.path
 import socket
 import socketserver
 import threading
+from collections.abc import Callable, Generator
 from contextlib import closing, contextmanager
 from http.server import SimpleHTTPRequestHandler
-from typing import Callable, Generator
 from urllib.request import urlopen
 
 import h11

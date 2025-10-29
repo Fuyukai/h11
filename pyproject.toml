@@ -48,6 +48,7 @@ ignore = [
     "EM",
     "S101",    # Allow asserts
     "TC006",
+    "COM812",
 ]
 
 [tool.towncrier]

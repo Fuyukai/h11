@@ -1,25 +1,22 @@
-from typing import cast, List, Type, Union, ValuesView
+from collections.abc import ValuesView
+from typing import cast
 
-from .._connection import Connection, NEED_DATA, PAUSED
+from .._connection import NEED_DATA, PAUSED, Connection
 from .._events import (
     ConnectionClosed,
     Data,
-    EndOfMessage,
     Event,
-    InformationalResponse,
-    Request,
-    Response,
 )
-from .._state import CLIENT, CLOSED, DONE, MUST_CLOSE, SERVER
+from .._state import CLIENT, SERVER
 from .._util import Sentinel
 
 try:
     from typing import Literal
 except ImportError:
-    from typing_extensions import Literal  # type: ignore
+    from typing import Literal  # type: ignore
 
 
-def get_all_events(conn: Connection) -> List[Event]:
+def get_all_events(conn: Connection) -> list[Event]:
     got_events = []
     while True:
         event = conn.next_event()
@@ -32,15 +29,15 @@ def get_all_events(conn: Connection) -> List[Event]:
     return got_events
 
 
-def receive_and_get(conn: Connection, data: bytes) -> List[Event]:
+def receive_and_get(conn: Connection, data: bytes) -> list[Event]:
     conn.receive_data(data)
     return get_all_events(conn)
 
 
 # Merges adjacent Data events, converts payloads to bytestrings, and removes
 # chunk boundaries.
-def normalize_data_events(in_events: List[Event]) -> List[Event]:
-    out_events: List[Event] = []
+def normalize_data_events(in_events: list[Event]) -> list[Event]:
+    out_events: list[Event] = []
     for event in in_events:
         if type(event) is Data:
             event = Data(data=bytes(event.data), chunk_start=False, chunk_end=False)
@@ -71,9 +68,9 @@ class ConnectionPair:
     # expect="match" if expect=send_events; expect=[...] to say what expected
     def send(
         self,
-        role: Type[Sentinel],
-        send_events: Union[List[Event], Event],
-        expect: Union[List[Event], Event, Literal["match"]] = "match",
+        role: type[Sentinel],
+        send_events: list[Event] | Event,
+        expect: list[Event] | Event | Literal["match"] = "match",
     ) -> bytes:
         if not isinstance(send_events, list):
             send_events = [send_events]
