@@ -1,3 +1,5 @@
+# ruff: noqa: N802
+
 import pytest
 
 from .._events import (

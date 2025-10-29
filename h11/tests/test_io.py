@@ -1,3 +1,5 @@
+# ruff: noqa: T201, N802
+
 from collections.abc import Callable, Generator
 from typing import Any
 
@@ -413,10 +415,7 @@ def test_ChunkedReader() -> None:
 
     t_body_reader(
         ChunkedReader,
-        b"5\r\n01234\r\n"
-         b"10\r\n0123456789abcdef\r\n"
-         b"0\r\n"
-         b"Some: header\r\n\r\n",
+        b"5\r\n01234\r\n10\r\n0123456789abcdef\r\n0\r\nSome: header\r\n\r\n",
         [
             Data(data=b"012340123456789abcdef"),
             EndOfMessage(headers=[("Some", "header")]),
@@ -448,9 +447,9 @@ def test_ChunkedReader() -> None:
     t_body_reader(
         ChunkedReader,
         b"5; hello=there\r\n"
-         b"xxxxx"
-         b"\r\n"
-         b'0; random="junk"; some=more; canbe=lonnnnngg\r\n\r\n',
+        b"xxxxx"
+        b"\r\n"
+        b'0; random="junk"; some=more; canbe=lonnnnngg\r\n\r\n',
         [Data(data=b"xxxxx"), EndOfMessage()],
     )
 
@@ -554,7 +553,7 @@ def test_reject_non_vchar_in_path() -> None:
         message.append(bad_char)
         message.extend(b" HTTP/1.1\r\nHost: foobar\r\n\r\n")
         with pytest.raises(LocalProtocolError):
-            tr(READERS[CLIENT, IDLE], message, None)
+            tr(READERS[CLIENT, IDLE], bytes(message), None)
 
 
 # https://github.com/python-hyper/h11/issues/57

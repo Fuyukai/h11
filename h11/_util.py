@@ -83,7 +83,10 @@ class RemoteProtocolError(ProtocolError):
 
 
 def validate(
-    regex: Pattern[bytes], data: bytes, msg: str = "malformed data", *format_args: Any
+    regex: Pattern[bytes],
+    data: bytes | bytearray,
+    msg: str = "malformed data",
+    *format_args: Any,
 ) -> dict[str, bytes]:
     match = regex.fullmatch(data)
     if not match:
@@ -118,8 +121,8 @@ class Sentinel(type):
         v.__class__ = v  # type: ignore
         return v
 
-    def __repr__(self) -> str:
-        return self.__name__
+    def __repr__(cls) -> str:
+        return cls.__name__
 
 
 # Used for methods, request targets, HTTP versions, header names, and header

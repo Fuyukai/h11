@@ -1,3 +1,5 @@
+# ruff: noqa: N802, T201
+
 from typing import Any, cast
 
 import pytest
@@ -7,6 +9,7 @@ from .._events import (
     ConnectionClosed,
     Data,
     EndOfMessage,
+    Event,
     InformationalResponse,
     Request,
     Response,
@@ -64,7 +67,7 @@ def test__body_framing() -> None:
             headers.append(("Content-Length", str(cl)))
         if te:
             headers.append(("Transfer-Encoding", "chunked"))
-        return headers
+        return headers  # type: ignore
 
     def resp(
         status_code: int = 200, cl: int | None = None, te: bool = False
@@ -102,7 +105,7 @@ def test__body_framing() -> None:
 
 
 def test_Connection_basics_and_content_length() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         Connection("CLIENT")  # type: ignore
 
     p = ConnectionPair()
@@ -412,7 +415,7 @@ def test_max_incomplete_event_size_countermeasure() -> None:
     c = Connection(SERVER)
     c.receive_data(b"GET / HTTP/1.0\r\nEndless: ")
     assert c.next_event() is NEED_DATA
-    with pytest.raises(RemoteProtocolError):
+    with pytest.raises(RemoteProtocolError):  # noqa: PT012
         while True:
             c.receive_data(b"a" * 1024)
             c.next_event()
@@ -632,7 +635,7 @@ def test_protocol_switch() -> None:
 
         def setup() -> ConnectionPair:
             p = ConnectionPair()
-            p.send(CLIENT, req)
+            p.send(CLIENT, req)  # noqa: B023
             # No switch-related state change stuff yet; the client has to
             # finish the request before that kicks in
             for conn in p.conns:
@@ -717,14 +720,14 @@ def test_close_simple() -> None:
     # Just immediately closing a new connection without anything having
     # happened yet.
     for who_shot_first, who_shot_second in [(CLIENT, SERVER), (SERVER, CLIENT)]:
-
+        # all these noqas are fine bc the function is immediately called
         def setup() -> ConnectionPair:
             p = ConnectionPair()
-            p.send(who_shot_first, ConnectionClosed())
+            p.send(who_shot_first, ConnectionClosed())  # noqa: B023
             for conn in p.conns:
                 assert conn.states == {
-                    who_shot_first: CLOSED,
-                    who_shot_second: MUST_CLOSE,
+                    who_shot_first: CLOSED,  # noqa: B023
+                    who_shot_second: MUST_CLOSE,  # noqa: B023
                 }
             return p
 
@@ -755,11 +758,11 @@ def test_close_simple() -> None:
 
 
 def test_close_different_states() -> None:
-    req = [
+    req: list[Event] = [
         Request(method="GET", target="/foo", headers=[("Host", "a")]),
         EndOfMessage(),
     ]
-    resp = [
+    resp: list[Event] = [
         Response(status_code=200, headers=[(b"transfer-encoding", b"chunked")]),
         EndOfMessage(),
     ]
@@ -945,17 +948,17 @@ def test_errors() -> None:
             bad = Response(status_code=200, headers=[], http_version="1.0")  # type: ignore[assignment]
         # Make sure 'good' actually is good
         c = conn(role)
-        c.send(good)
+        c.send(good)  # pyrefly: ignore[unbound-name]
         assert c.our_state is not ERROR
         # Do that again, but this time sending 'bad' first
         c = conn(role)
         with pytest.raises(LocalProtocolError):
-            c.send(bad)
+            c.send(bad)  # pyrefly: ignore[unbound-name]
         assert c.our_state is ERROR
         assert c.their_state is not ERROR
         # Now 'good' is not so good
         with pytest.raises(LocalProtocolError):
-            c.send(good)
+            c.send(good)  # pyrefly: ignore[unbound-name]
 
         # And check send_failed() too
         c = conn(role)

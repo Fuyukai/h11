@@ -1,4 +1,3 @@
-
 import pytest
 
 from .._receivebuffer import ReceiveBuffer

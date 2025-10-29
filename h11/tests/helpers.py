@@ -8,7 +8,6 @@ from .._events import (
     Event,
 )
 from .._state import CLIENT, SERVER
-from .._util import Sentinel
 
 try:
     from typing import Literal
@@ -40,12 +39,12 @@ def normalize_data_events(in_events: list[Event]) -> list[Event]:
     out_events: list[Event] = []
     for event in in_events:
         if type(event) is Data:
-            event = Data(data=bytes(event.data), chunk_start=False, chunk_end=False)
+            event = Data(data=bytes(event.data), chunk_start=False, chunk_end=False)  # noqa: PLW2901
         if out_events and type(out_events[-1]) is type(event) is Data:
             out_events[-1] = Data(
-                data=out_events[-1].data + event.data,
-                chunk_start=out_events[-1].chunk_start,
-                chunk_end=out_events[-1].chunk_end,
+                data=out_events[-1].data + event.data,  # type: ignore
+                chunk_start=out_events[-1].chunk_start,  # type: ignore
+                chunk_end=out_events[-1].chunk_end,  # type: ignore
             )
         else:
             out_events.append(event)
@@ -68,7 +67,7 @@ class ConnectionPair:
     # expect="match" if expect=send_events; expect=[...] to say what expected
     def send(
         self,
-        role: type[Sentinel],
+        role: type[CLIENT] | type[SERVER],
         send_events: list[Event] | Event,
         expect: list[Event] | Event | Literal["match"] = "match",
     ) -> bytes:

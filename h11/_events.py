@@ -28,7 +28,7 @@ method_re = re.compile(method.encode("ascii"))
 request_target_re = re.compile(request_target.encode("ascii"))
 
 
-class Event(ABC):
+class Event(ABC):  # noqa: B024
     """
     Base class for h11 events.
     """
@@ -109,9 +109,10 @@ class Request(Event):
         # Host header field with an invalid field-value."
         # -- https://tools.ietf.org/html/rfc7230#section-5.4
         host_count = 0
-        for name, value in self.headers:
+        for name, _ in self.headers:
             if name == b"host":
                 host_count += 1
+
         if self.http_version == b"1.1" and host_count == 0:
             raise LocalProtocolError("Missing mandatory Host: header")
         if host_count > 1:
@@ -246,7 +247,8 @@ class Response(_ResponseBase):
     def __post_init__(self) -> None:
         if not (200 <= self.status_code < 1000):
             raise LocalProtocolError(
-                f"Response status_code should be in range [200, 1000), not {self.status_code}"
+                "Response status_code should be in range [200, 1000), "
+                f"not {self.status_code}"
             )
 
     # This is an unhashable type.
@@ -301,7 +303,7 @@ class Data(Event):
         object.__setattr__(self, "chunk_end", chunk_end)
 
     # This is an unhashable type.
-    __hash__ = None  # type: ignore
+    __hash__ = None
 
 
 # XX FIXME: "A recipient MUST ignore (or consider as an error) any fields that
@@ -334,7 +336,10 @@ class EndOfMessage(Event):
     def __init__(
         self,
         *,
-        headers: Headers | list[tuple[bytes, bytes]] | list[tuple[str, str]] | None = None,
+        headers: Headers
+        | list[tuple[bytes, bytes]]
+        | list[tuple[str, str]]
+        | None = None,
         _parsed: bool = False,
     ) -> None:
         super().__init__()
@@ -360,4 +365,3 @@ class ConnectionClosed(Event):
 
     No fields.
     """
-

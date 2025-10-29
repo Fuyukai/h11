@@ -42,7 +42,7 @@ from ._writers import WRITERS, WritersType
 __all__ = ["NEED_DATA", "PAUSED", "Connection"]
 
 
-class NEED_DATA(Sentinel, metaclass=Sentinel):
+class NEED_DATA(Sentinel, metaclass=Sentinel):  # noqa: N801
     pass
 
 
@@ -79,13 +79,12 @@ def _keep_alive(event: Request | Response) -> bool:
     connection = get_comma_header(event.headers, b"connection")
     if b"close" in connection:
         return False
-    if getattr(event, "http_version", b"1.1") < b"1.1":
-        return False
-    return True
+
+    return not getattr(event, "http_version", b"1.1") < b"1.1"
 
 
 def _body_framing(
-    request_method: bytes, event: Request | Response
+    request_method: bytes | None, event: Request | Response
 ) -> tuple[str, tuple[()] | tuple[int]]:
     # Called when we enter SEND_BODY to figure out framing information for
     # this body.
@@ -253,12 +252,13 @@ class Connection:
     def _server_switch_event(self, event: Event) -> type[Sentinel] | None:
         if type(event) is InformationalResponse and event.status_code == 101:
             return _SWITCH_UPGRADE
-        if type(event) is Response:
-            if (
-                _SWITCH_CONNECT in self._cstate.pending_switch_proposals
-                and 200 <= event.status_code < 300
-            ):
-                return _SWITCH_CONNECT
+
+        if type(event) is Response and (
+            _SWITCH_CONNECT in self._cstate.pending_switch_proposals
+            and 200 <= event.status_code < 300
+        ):
+            return _SWITCH_CONNECT
+
         return None
 
     # All events go through here
@@ -413,16 +413,15 @@ class Connection:
             return PAUSED
         assert self._reader is not None
         event = self._reader(self._receive_buffer)
-        if event is None:
-            if not self._receive_buffer and self._receive_buffer_closed:
-                # In some unusual cases (basically just HTTP/1.0 bodies), EOF
-                # triggers an actual protocol event; in that case, we want to
-                # return that event, and then the state will change and we'll
-                # get called again to generate the actual ConnectionClosed().
-                if hasattr(self._reader, "read_eof"):
-                    event = self._reader.read_eof()
-                else:
-                    event = ConnectionClosed()
+        if event is None and (not self._receive_buffer and self._receive_buffer_closed):
+            # In some unusual cases (basically just HTTP/1.0 bodies), EOF
+            # triggers an actual protocol event; in that case, we want to
+            # return that event, and then the state will change and we'll
+            # get called again to generate the actual ConnectionClosed().
+            if hasattr(self._reader, "read_eof"):
+                event = self._reader.read_eof()
+            else:
+                event = ConnectionClosed()
         if event is None:
             event = NEED_DATA
         return event  # type: ignore[no-any-return]

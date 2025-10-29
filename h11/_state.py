@@ -110,9 +110,20 @@
 # tables. But it can't automatically read the transitions that are written
 # directly in Python code. So if you touch those, you need to also update the
 # script to keep it in sync!
+
+# ruff: noqa: N801
+
 from typing import cast
 
-from ._events import *
+from ._events import (
+    ConnectionClosed,
+    Data,
+    EndOfMessage,
+    Event,
+    InformationalResponse,
+    Request,
+    Response,
+)
 from ._util import LocalProtocolError, Sentinel
 
 # Everything in __all__ gets re-exported as part of the h11 public API.
@@ -307,7 +318,8 @@ class ConnectionState:
         except KeyError:
             event_type = cast(type[Event], event_type)
             raise LocalProtocolError(
-                f"can't handle event type {event_type.__name__} when role={role} and state={self.states[role]}"
+                f"can't handle event type {event_type.__name__} when role={role} "
+                "and state={self.states[role]}"
             ) from None
         self.states[role] = new_state
 
@@ -329,13 +341,14 @@ class ConnectionState:
             # they close the connection, or else the server will deny the
             # request, in which case the client will go back to DONE and then
             # from there to MUST_CLOSE.
-            if self.pending_switch_proposals:
-                if self.states[CLIENT] is DONE:
-                    self.states[CLIENT] = MIGHT_SWITCH_PROTOCOL
+            if self.pending_switch_proposals and self.states[CLIENT] is DONE:
+                self.states[CLIENT] = MIGHT_SWITCH_PROTOCOL
 
-            if not self.pending_switch_proposals:
-                if self.states[CLIENT] is MIGHT_SWITCH_PROTOCOL:
-                    self.states[CLIENT] = DONE
+            if (
+                not self.pending_switch_proposals
+                and self.states[CLIENT] is MIGHT_SWITCH_PROTOCOL
+            ):
+                self.states[CLIENT] = DONE
 
             if not self.keep_alive:
                 for role in (CLIENT, SERVER):

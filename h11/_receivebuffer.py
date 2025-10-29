@@ -1,4 +1,5 @@
 import re
+from typing import Self
 
 __all__ = ["ReceiveBuffer"]
 
@@ -48,7 +49,7 @@ class ReceiveBuffer:
         self._next_line_search = 0
         self._multiple_lines_search = 0
 
-    def __iadd__(self, byteslike: bytes | bytearray) -> "ReceiveBuffer":
+    def __iadd__(self, byteslike: bytes | bytearray) -> Self:
         self._data += byteslike
         return self
 

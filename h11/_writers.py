@@ -15,6 +15,11 @@ from ._headers import Headers
 from ._state import CLIENT, IDLE, SEND_BODY, SEND_RESPONSE, SERVER
 from ._util import LocalProtocolError, Sentinel
 
+try:
+    from typing import override
+except ImportError:
+    from typing_extensions import override
+
 __all__ = ["WRITERS"]
 
 Writer = Callable[[bytes], Any]
@@ -67,7 +72,7 @@ class BodyWriter:
         elif type(event) is EndOfMessage:
             self.send_eom(event.headers, write)
         else:  # pragma: no cover
-            assert False
+            raise AssertionError
 
     def send_data(self, data: bytes, write: Writer) -> None:
         pass
@@ -92,6 +97,7 @@ class ContentLengthWriter(BodyWriter):
             raise LocalProtocolError("Too much data for declared Content-Length")
         write(data)
 
+    @override
     def send_eom(self, headers: Headers, write: Writer) -> None:
         if self._length != 0:
             raise LocalProtocolError("Too little data for declared Content-Length")
@@ -118,6 +124,7 @@ class Http10Writer(BodyWriter):
     def send_data(self, data: bytes, write: Writer) -> None:
         write(data)
 
+    @override
     def send_eom(self, headers: Headers, write: Writer) -> None:
         if headers:
             raise LocalProtocolError("can't send trailers to HTTP/1.0 client")
@@ -127,7 +134,9 @@ class Http10Writer(BodyWriter):
 
 WritersType = dict[
     tuple[type[Sentinel], type[Sentinel]] | type[Sentinel],
-    dict[str, type[BodyWriter]] | Callable[[InformationalResponse | Response, Writer], None] | Callable[[Request, Writer], None],
+    dict[str, type[BodyWriter]]
+    | Callable[[InformationalResponse | Response, Writer], None]
+    | Callable[[Request, Writer], None],
 ]
 
 WRITERS: WritersType = {

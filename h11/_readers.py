@@ -41,9 +41,9 @@ header_field_re = re.compile(header_field.encode("ascii"))
 obs_fold_re = re.compile(rb"[ \t]+")
 
 
-def _obsolete_line_fold(lines: Iterable[bytes]) -> Iterable[bytes]:
+def _obsolete_line_fold(lines: Iterable[bytes | bytearray]) -> Iterable[bytes]:
     it = iter(lines)
-    last: bytes | None = None
+    last: bytearray | None = None
     for line in it:
         match = obs_fold_re.match(line)
         if match:
@@ -56,14 +56,14 @@ def _obsolete_line_fold(lines: Iterable[bytes]) -> Iterable[bytes]:
             last += line[match.end() :]
         else:
             if last is not None:
-                yield last
-            last = line
+                yield bytes(last)
+            last = bytearray(line)
     if last is not None:
-        yield last
+        yield bytes(last)
 
 
 def _decode_header_lines(
-    lines: Iterable[bytes],
+    lines: Iterable[bytes | bytearray],
 ) -> Iterable[tuple[bytes, bytes]]:
     for line in _obsolete_line_fold(lines):
         matches = validate(header_field_re, line, "illegal header line: {!r}", line)
@@ -73,7 +73,7 @@ def _decode_header_lines(
 request_line_re = re.compile(request_line.encode("ascii"))
 
 
-def maybe_read_from_IDLE_client(buf: ReceiveBuffer) -> Request | None:
+def maybe_read_from_IDLE_client(buf: ReceiveBuffer) -> Request | None:  # noqa: N802
     lines = buf.maybe_extract_lines()
     if lines is None:
         if buf.is_next_line_obviously_invalid_request_line():
@@ -92,7 +92,7 @@ def maybe_read_from_IDLE_client(buf: ReceiveBuffer) -> Request | None:
 status_line_re = re.compile(status_line.encode("ascii"))
 
 
-def maybe_read_from_SEND_RESPONSE_server(
+def maybe_read_from_SEND_RESPONSE_server(  # noqa: N802
     buf: ReceiveBuffer,
 ) -> InformationalResponse | Response | None:
     lines = buf.maybe_extract_lines()
@@ -132,12 +132,13 @@ class ContentLengthReader:
         if data is None:
             return None
         self._remaining -= len(data)
-        return Data(data=data)
+        return Data(data=bytes(data))
 
     def read_eof(self) -> NoReturn:
         raise RemoteProtocolError(
             "peer closed connection without sending complete message body "
-            f"(received {self._length - self._remaining} bytes, expected {self._length})"
+            f"(received {self._length - self._remaining} bytes, "
+            f"expected {self._length})"
         )
 
 
@@ -164,7 +165,8 @@ class ChunkedReader:
                 return None
             if data != self._bytes_to_discard[: len(data)]:
                 raise LocalProtocolError(
-                    f"malformed chunk footer: {data!r} (expected {self._bytes_to_discard!r})"
+                    f"malformed chunk footer: {data!r} "
+                    "(expected {self._bytes_to_discard!r})"
                 )
             self._bytes_to_discard = self._bytes_to_discard[len(data) :]
             if self._bytes_to_discard:
@@ -200,7 +202,7 @@ class ChunkedReader:
             chunk_end = True
         else:
             chunk_end = False
-        return Data(data=data, chunk_start=chunk_start, chunk_end=chunk_end)
+        return Data(data=bytes(data), chunk_start=chunk_start, chunk_end=chunk_end)
 
     def read_eof(self) -> NoReturn:
         raise RemoteProtocolError(
@@ -214,7 +216,7 @@ class Http10Reader:
         data = buf.maybe_extract_at_most(999999999)
         if data is None:
             return None
-        return Data(data=data)
+        return Data(data=bytes(data))
 
     def read_eof(self) -> EndOfMessage:
         return EndOfMessage()

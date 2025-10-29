@@ -1,6 +1,8 @@
+# ruff: noqa: PLW2901
+
 import re
 from collections.abc import Sequence
-from typing import TYPE_CHECKING, Union, overload
+from typing import TYPE_CHECKING, overload
 
 from ._abnf import field_name, field_value
 from ._util import LocalProtocolError, bytesify, validate
@@ -100,7 +102,7 @@ class Headers(Sequence[tuple[bytes, bytes]]):
     ]
     """
 
-    __slots__ = "_full_items"
+    __slots__ = ("_full_items",)
 
     def __init__(self, full_items: list[tuple[bytes, bytes, bytes]]) -> None:
         self._full_items = full_items
@@ -111,11 +113,14 @@ class Headers(Sequence[tuple[bytes, bytes]]):
     def __eq__(self, other: object) -> bool:
         return list(self) == list(other)  # type: ignore
 
+    def __hash__(self) -> int:
+        return hash(tuple(self._full_items))
+
     def __len__(self) -> int:
         return len(self._full_items)
 
     def __repr__(self) -> str:
-        return "<Headers(%s)>" % repr(list(self))
+        return f"<Headers({list(self)})>"
 
     def __getitem__(self, idx: int) -> tuple[bytes, bytes]:  # type: ignore[override]
         _, name, value = self._full_items[idx]
@@ -125,12 +130,12 @@ class Headers(Sequence[tuple[bytes, bytes]]):
         return [(raw_name, value) for raw_name, _, value in self._full_items]
 
 
-HeaderTypes = Union[
-    list[tuple[bytes, bytes]],
-    list[tuple[bytes, str]],
-    list[tuple[str, bytes]],
-    list[tuple[str, str]],
-]
+HeaderTypes = (
+    list[tuple[bytes, bytes]]
+    | list[tuple[bytes, str]]
+    | list[tuple[str, bytes]]
+    | list[tuple[str, str]]
+)
 
 
 @overload
@@ -155,7 +160,7 @@ def normalize_and_validate(
     new_headers = []
     seen_content_length = None
     saw_transfer_encoding = False
-    for name, value in headers:
+    for name, value in headers:  # pyrefly: ignore[bad-assignment]
         # For headers coming out of the parser, we can safely skip some steps,
         # because it always returns bytes and has already run these regexes
         # over the data:
@@ -267,8 +272,8 @@ def set_comma_header(headers: Headers, name: bytes, new_values: list[bytes]) -> 
     for found_raw_name, found_name, found_raw_value in headers._full_items:
         if found_name != name:
             new_headers.append((found_raw_name, found_raw_value))
-    for new_value in new_values:
-        new_headers.append((name.title(), new_value))
+
+    new_headers.extend((name.title(), new_value) for new_value in new_values)
     return normalize_and_validate(new_headers)
 
 
